@@ -1,4 +1,4 @@
-<p align="center"><img src="images/logo.svg" alt="听己 SongLib Muse" width="320"></p>
+<p align="center"><img src="images/icon.png" alt="听己 SongLib Muse" width="160"></p>
 
 # 听己 SongLib Muse
 
