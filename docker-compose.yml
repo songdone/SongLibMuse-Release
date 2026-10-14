@@ -1,0 +1,53 @@
+# 听己 · 通用 Docker Compose 部署
+#
+# 用法：把本文件和 .env.example 放进同一个目录（例如 /vol1/1000/Docker/tingji），
+# 将 .env.example 复制为 .env 并按里面的说明填写，然后在该目录执行：
+#
+#   mkdir -p data models
+#   docker compose up -d
+#
+# 浏览器打开 http://NAS的IP:18000 创建管理员；需要的初始化口令用 docker logs tingji 查看。
+# 详细步骤见 https://github.com/songdone/SongLibMuse-Release/blob/main/docs/部署教程.md。
+
+name: tingji
+
+services:
+  tingji:
+    image: ${TINGJI_IMAGE:-666uos/songlib-muse:0.6.33}
+    container_name: tingji
+    restart: unless-stopped
+    # 以普通用户运行，数据目录与模型目录需属于这个用户（执行 id 查看自己的编号）。
+    user: "${PUID:-1000}:${PGID:-1000}"
+    stop_grace_period: 20s
+    ports:
+      # 网页
+      - "${TINGJI_WEB_PORT:-18000}:8000"
+      # 设备接口（音屿等客户端）；填了 TINGJI_NATIVE_LAN_URL 或 TINGJI_NATIVE_PUBLIC_URL 才启用
+      - "${TINGJI_NATIVE_PORT:-18001}:8001"
+    environment:
+      # 用任何地址打开都能用（见下方 ALLOW_ANY_HOST），这里只是默认地址，一般不用改
+      TINGJI_PUBLIC_URL: ${TINGJI_PUBLIC_URL:-http://127.0.0.1:8000}
+      # 允许在家里用 http://局域网IP 打开；外网仍须 HTTPS
+      TINGJI_INSECURE_HTTP: ${TINGJI_INSECURE_HTTP:-1}
+      TINGJI_ALTERNATE_PUBLIC_URLS: ${TINGJI_ALTERNATE_PUBLIC_URLS:-}
+      # 用任何地址（局域网 IP、主机名、各线路域名）打开都能用；写操作仍要求来源与当前地址一致
+      TINGJI_ALLOW_ANY_HOST: ${TINGJI_ALLOW_ANY_HOST:-1}
+      TINGJI_TRUSTED_PROXY_IPS: ${TINGJI_TRUSTED_PROXY_IPS:-}
+      TINGJI_NATIVE_PUBLIC_URL: ${TINGJI_NATIVE_PUBLIC_URL:-}
+      TINGJI_NATIVE_ALTERNATE_PUBLIC_URLS: ${TINGJI_NATIVE_ALTERNATE_PUBLIC_URLS:-}
+      TINGJI_NATIVE_LAN_URL: ${TINGJI_NATIVE_LAN_URL:-}
+      TINGJI_ALLOW_MODEL_DOWNLOADS: ${TINGJI_ALLOW_MODEL_DOWNLOADS:-1}
+      TINGJI_ANALYSIS_THREADS: ${TINGJI_ANALYSIS_THREADS:-2}
+      TZ: ${TZ:-Asia/Shanghai}
+    volumes:
+      - ${TINGJI_DATA_DIR:-./data}:/data
+      - ${TINGJI_MODELS_DIR:-./models}:/models
+      # 曲库默认可写：下载入库、补齐歌词封面、改标签、整理文件都需要写入，且都要你在网页里确认、可撤销。
+      # 只想让听己读不想让它写，就在 .env 里设 TINGJI_MUSIC_MODE=ro。
+      # 有多个音乐文件夹时，删掉下面这一行，改为每个文件夹挂到 /music/<名字>，
+      # 听己会把每个文件夹识别为一个曲库，例如：
+      #   - /vol1/1000/华语:/music/华语
+      #   - /vol2/1000/古典:/music/古典
+      - ${TINGJI_MUSIC_DIR:?请在 .env 中填写音乐文件夹}:/music:${TINGJI_MUSIC_MODE:-rw}
+    cpus: ${TINGJI_CPUS:-2}
+    mem_limit: ${TINGJI_MEMORY:-4g}
