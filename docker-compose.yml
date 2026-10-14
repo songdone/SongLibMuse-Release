@@ -7,13 +7,13 @@
 #   docker compose up -d
 #
 # 浏览器打开 http://NAS的IP:18000 创建管理员；需要的初始化口令用 docker logs tingji 查看。
-# 详细步骤见 https://github.com/songdone/SongLibMuse-Release/blob/main/docs/部署教程.md。
+# 详细步骤见 docs/部署教程.md。
 
 name: tingji
 
 services:
   tingji:
-    image: ${TINGJI_IMAGE:-666uos/songlib-muse:0.6.33}
+    image: ${TINGJI_IMAGE:-666uos/songlib-muse:0.6.35}
     container_name: tingji
     restart: unless-stopped
     # 以普通用户运行，数据目录与模型目录需属于这个用户（执行 id 查看自己的编号）。
