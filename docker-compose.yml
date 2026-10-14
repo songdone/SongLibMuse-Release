@@ -13,7 +13,7 @@ name: tingji
 
 services:
   tingji:
-    image: ${TINGJI_IMAGE:-666uos/songlib-muse:0.6.35}
+    image: ${TINGJI_IMAGE:-666uos/songlib-muse:0.6.36}
     container_name: tingji
     restart: unless-stopped
     # 以普通用户运行，数据目录与模型目录需属于这个用户（执行 id 查看自己的编号）。
